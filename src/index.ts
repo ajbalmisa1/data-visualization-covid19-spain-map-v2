@@ -13,18 +13,16 @@ const div = d3
   .attr("class", "tooltip")
   .style("opacity", 0);
 
+const getAffectedCases = (comunidad: string, data: any[]) => {
+  const entry = data.find((item) => item.name === comunidad);  
+  return entry ? entry.value : 0;
+};
 
-/*const affectedRadiusScale = (data: ResultEntry[]) => d3
-  .scaleLinear()
-  .domain([0, maxAffected(data)])
-  .range([0, 50]);
-*/
-
-  const calculateBasedOnAffectedCases = (comunidad: string, data: any[]) => {
-    const entry = data.find((item) => item.name === comunidad);
-    var max = data.reduce((max, item) => (item.value > max ? item.value : max), 0);
-    return entry ? (entry.value / max) * 40 : 0;
-  };
+const calculateBasedOnAffectedCases = (comunidad: string, data: any[]) => {
+  const value = getAffectedCases(comunidad, data)
+  var max = data.reduce((max, item) => (item.value > max ? item.value : max), 0);
+  return value / max * 40;
+};
   
 const calculateRadiusBasedOnAffectedCases = (
     comunidad: string,
@@ -82,8 +80,23 @@ const updateData = (data: any[]) => {
       "#122b47",
     ]);
 
+  const colorCircle = d3
+    .scaleThreshold<number, string>()
+    .domain([0, 50, 100, 1200, 5000, 50000])
+    .range([
+      "#6ca550",
+      "#b5c362",      
+      "#fde181",
+      "#ffc3ac",
+      "#fc8c77",
+      "#bf5847"
+    ]);
+
   const assignColor = (comunidad: string, dataset: ResultEntry[], circle: boolean) => {
     const entry = dataset.find((item) => item.name === comunidad);
+    if (circle){
+      return entry ? colorCircle(entry.value) : colorCircle(0);
+    }
     return entry ? colorCommunity(entry.value) : colorCommunity(0);
   };
 
@@ -102,14 +115,25 @@ const updateData = (data: any[]) => {
     .selectAll("circle")
     .data(latLongCommunities)
     .enter()
-    .append("circle")
+    .append("circle")    
     .attr("class", "affected-marker")
     .attr("fill", (d, i) => {
       return assignColor(d.name, data, true);
     })
     .attr("r", (d) => calculateRadiusBasedOnAffectedCases(d.name, data))
     .attr("cx", (d) => aProjection([d.long, d.lat])[0])
-    .attr("cy", (d) => aProjection([d.long, d.lat])[1]);
+    .attr("cy", (d) => aProjection([d.long, d.lat])[1])
+    .on("mouseover", function (e: any, datum:any) {            
+        const coords = { x: e.x, y: e.y };
+        div.transition().duration(200).style("opacity", 0.9);
+        div
+          .html(`<span>${datum.name}: ${getAffectedCases(datum.name, data)}</span>`)
+          .style("left", `${coords.x}px`)
+          .style("top", `${coords.y - 28}px`);
+      })
+      .on("mouseout", function (datum) {    
+        div.transition().duration(500).style("opacity", 0);
+      });
   };
 
   document
@@ -123,3 +147,5 @@ document
   .addEventListener("click", function handleResultsNovember() {
     updateData(stats_current);
   });
+
+  updateData(stats_previous);

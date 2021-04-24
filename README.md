@@ -1,6 +1,8 @@
 # data-visualization-covid19-spain-map-v2
 
-![mapa_covid.png](./static/mapa_covid.png "Covid Map")
+![spain_covid_map_before.png](./static/spain_covid_map_before.png "Covid Map March 2020")
+
+![spain_covid_map_after.png](./static/spain_covid_map_after.png "Covid Map April 2021")
 
 # Objective
 

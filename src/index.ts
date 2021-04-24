@@ -115,14 +115,16 @@ const updateData = (data: any[]) => {
     .selectAll("circle")
     .data(latLongCommunities)
     .enter()
-    .append("circle")    
+    .append("circle")
+    //.transition()
+    //.duration(500)
     .attr("class", "affected-marker")
     .attr("fill", (d, i) => {
       return assignColor(d.name, data, true);
     })
     .attr("r", (d) => calculateRadiusBasedOnAffectedCases(d.name, data))
     .attr("cx", (d) => aProjection([d.long, d.lat])[0])
-    .attr("cy", (d) => aProjection([d.long, d.lat])[1])
+    .attr("cy", (d) => aProjection([d.long, d.lat])[1])    
     .on("mouseover", function (e: any, datum:any) {            
         const coords = { x: e.x, y: e.y };
         div.transition().duration(200).style("opacity", 0.9);
@@ -134,7 +136,7 @@ const updateData = (data: any[]) => {
       .on("mouseout", function (datum) {    
         div.transition().duration(500).style("opacity", 0);
       });
-  };
+};
 
   document
   .getElementById("Previous")
